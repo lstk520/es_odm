@@ -29,7 +29,7 @@ setup(
         "elasticsearch_dsl",
     ],
     author="leon",
-    url="",
+    url="https://github.com/lstk520/es_odm",
     author_email="lstk520@qq.com",
     packages=find_packages(),
     package_data={
