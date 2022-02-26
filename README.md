@@ -1,10 +1,13 @@
 # es_odm
 
 ODM (Object Document Mapper) for Elasticsearch based on Elasticsearch_dsl and Pydantic.
+It's also a bridge connecting Mysql and Elasticsearch when using sqlmodel, They are all based on pydantic.
+
 
 ## Installation
 
 Install using `pip install -U es_odm` or `conda install es_odm -c conda-forge`.
+
 
 ## A Simple Example
 
