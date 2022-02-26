@@ -11,6 +11,7 @@ setup(
     name="es_odm",
     version=VERSION_TEXT,
     description="ODM (Object Document Mapper) for Elasticsearch based on Elasticsearch_dsl and Pydantic",
+    long_description_content_type='text/markdown',
     long_description=open("README.md", "r").read(),
     classifiers=[
         'Intended Audience :: Developers',
