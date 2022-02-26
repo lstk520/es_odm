@@ -11,9 +11,8 @@ setup(
     name="es_odm",
     version=VERSION_TEXT,
     description="ODM (Object Document Mapper) for Elasticsearch based on Elasticsearch_dsl and Pydantic",
-    long_description=open("README.rst", "r").read(),
+    long_description=open("README.md", "r").read(),
     classifiers=[
-        'Development Status :: 1 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Other Audience',
         'Intended Audience :: Science/Research',
@@ -33,7 +32,7 @@ setup(
     author_email="lstk520@qq.com",
     packages=find_packages(),
     package_data={
-        '': ["README.rst", "MANIFEST.in"],
+        '': ["README.md", "MANIFEST.in"],
         "es_odm": ["*"]
     },
     include_package_data=True,
