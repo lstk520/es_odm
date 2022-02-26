@@ -6,7 +6,7 @@ It's also a bridge connecting Mysql and Elasticsearch when using sqlmodel, They 
 
 ## Installation
 
-Install using `pip install -U es_odm` or `conda install es_odm -c conda-forge`.
+Install using `pip install -U es_odm`.
 
 
 ## A Simple Example
