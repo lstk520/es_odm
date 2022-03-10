@@ -67,35 +67,11 @@ class InnerFieldModel(Generic[InnerESModelType]):
         # Validation passed without errors, return the same instance received
         return v
 
-    # @classmethod
-    # def __modify_schema__(cls, field_schema):
-    #     # __modify_schema__ should mutate the dict it receives in place,
-    #     # the returned value will be ignored
-    #     # field_schema.update(
-    #     #     # simplified regex here for brevity, see the wikipedia link above
-    #     #     pattern='^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$',
-    #     #     # some example postcodes
-    #     #     examples=['SP11 9DG', 'w1j7bu'],
-    #     # )
-    #     ...
-
-    # @classmethod
-    # def __modify_schema__(cls, field_schema, field: Optional[ModelField]):
-    #     if field:
-    #         alphabet = field.field_info.extra['alphabet']
-    #         field_schema['examples'] = [c * 3 for c in alphabet]
-
 
 class ObjectField(InnerFieldModel, Generic[InnerESModelType]):
     """elasticsearch_dsl Object type"""
     def __init__(self, inner: Optional[InnerESModelType]):
         super().__init__(inner)
-
-    # @classmethod
-    # def __modify_schema__(cls, field_schema, field: Optional[ModelField]):
-    #     if field:
-    #         alphabet = field.field_info.extra['alphabet']
-    #         field_schema['examples'] = [c * 3 for c in alphabet]
 
 
 class NestedField(InnerFieldModel, Generic[InnerESModelType]):
@@ -105,7 +81,13 @@ class NestedField(InnerFieldModel, Generic[InnerESModelType]):
 
 
 class KeywordField(InnerFieldModel, Generic[InnerESModelType]):
-    """elasticsearch_dsl Nested type"""
+    """elasticsearch_dsl Keyword type"""
+    def __init__(self, inner: Optional[InnerESModelType]):
+        super().__init__(inner)
+
+
+class CommonField(InnerFieldModel, Generic[InnerESModelType]):
+    """elasticsearch_dsl field type"""
     def __init__(self, inner: Optional[InnerESModelType]):
         super().__init__(inner)
 
@@ -226,6 +208,11 @@ def get_dsl_field(field: Field) -> DSLField:
     if getattr(field, 'sub_fields') and len(field.sub_fields) > 1:
         field.type_ = field.sub_fields[0].type_
         real_model = field.sub_fields[0].sub_fields[0].type_
+
+        # commonField use the 2nd type hit in typing.Union
+        if issubclass(field.type_, CommonField):
+            field.type_ = field.sub_fields[1].type_
+            real_model = None
 
     if issubclass(field.type_, str):
         if field.field_info.keyword:
