@@ -238,6 +238,8 @@ def get_dsl_field(field: Field) -> DSLField:
         return Byte()
     if issubclass(field.type_, Decimal):
         return Float()
+    if issubclass(field.type_, dict):
+        return Object()
 
     # Object Nested Keyword
     if issubclass(field.type_, ObjectField):
