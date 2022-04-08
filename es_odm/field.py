@@ -215,7 +215,7 @@ def get_dsl_field(field: Field) -> DSLField:
             real_model = None
 
     if issubclass(field.type_, str):
-        if field.field_info.keyword:
+        if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
             return Text(fields={"keyword": Keyword()})
         return Text()
     if issubclass(field.type_, float):
