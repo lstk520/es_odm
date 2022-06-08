@@ -6,7 +6,15 @@ from es_odm import InnerESModel, ESModel, Field, ObjectField
 class UserProfileODM(InnerESModel):
     """user profile document"""
     user_id: int = Field(None, description="user id")
-    nickname: str = Field(None, description="user nickname", keyword=True)
+    nickname: str = Field(None, description="user nickname", keyword=True, fields={
+        "pinyin": {
+            "type": "text",
+            "store": False,
+            "term_vector": "with_offsets",
+            "analyzer": "pinyin_analyzer",
+            "boost": 10
+        }
+    })
     avatar_url: str = Field(None, description="user avatar url", keyword=True)
     gender: int = Field(None, description="gender")
     address: str = Field(None, description="address", keyword=True)
@@ -66,9 +74,6 @@ def test_odm_mapping():
                     "fields": {"keyword": {"type": "keyword"}},
                     "type": "text"
                 },
-                "last_login": {
-                    "type": "date"
-                },
                 "profile": {
                     "properties": {
                         "user_id": {
@@ -76,6 +81,13 @@ def test_odm_mapping():
                         },
                         "nickname": {
                             "fields": {
+                                "pinyin": {
+                                    'store': False,
+                                    'term_vector': 'with_offsets',
+                                    'analyzer': 'pinyin_analyzer',
+                                    'boost': 10,
+                                    'type': 'text'
+                                },
                                 "keyword": {
                                     "type": "keyword"
                                 }

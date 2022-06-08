@@ -103,6 +103,7 @@ class FieldInfo(PydanticFieldInfo):
         sa_column_kwargs = kwargs.pop("sa_column_kwargs", Undefined)
 
         keyword = kwargs.pop('keyword', Undefined)
+        fields = kwargs.pop('fields', Undefined)
         suggest = kwargs.pop('suggest', Undefined)
 
         if sa_column is not Undefined:
@@ -127,6 +128,7 @@ class FieldInfo(PydanticFieldInfo):
 
         self.suggest = suggest
         self.keyword = keyword
+        self.fields = fields
 
         self.extra = kwargs
 
@@ -163,6 +165,7 @@ def Field(  # noqa
     schema_extra: Optional[Dict[str, Any]] = None,
 
     keyword: bool = False,
+    fields: dict = None,
     suggest: bool = False,
 
     **extra: Any,
@@ -195,6 +198,7 @@ def Field(  # noqa
 
         keyword=keyword,
         suggest=suggest,
+        fields=fields,
 
         **current_schema_extra,
         **extra,
@@ -215,7 +219,12 @@ def get_dsl_field(field: Field) -> DSLField:
             real_model = None
 
     if issubclass(field.type_, str):
-        if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
+        if hasattr(field.field_info, 'fields') and field.field_info.fields and isinstance(field.field_info.fields, dict):
+            _fields = field.field_info.fields
+            if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
+                _fields["keyword"] = Keyword()
+            return Text(fields=_fields)
+        elif hasattr(field.field_info, 'keyword') and field.field_info.keyword:
             return Text(fields={"keyword": Keyword()})
         return Text()
     if issubclass(field.type_, float):
