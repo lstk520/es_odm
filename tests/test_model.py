@@ -1,6 +1,6 @@
 import typing
 
-from es_odm import InnerESModel, ESModel, Field, ObjectField
+from es_odm import InnerESModel, ESModel, Field, ObjectField, KeywordField
 
 
 class UserProfileODM(InnerESModel):
@@ -15,6 +15,7 @@ class UserProfileODM(InnerESModel):
 class UserODM(ESModel):
     """user document"""
     id: int = Field(None, primary_key=True, description="ID")
+    id_str: typing.Union[KeywordField[str], str] = Field(None, description='ID str')
     username: str = Field(None, description="login name", keyword=True)
 
     profile: typing.Union[ObjectField[UserProfileODM], dict] = Field(
@@ -37,6 +38,7 @@ class UserODM(ESModel):
 def test_odm_doc():
     doc_example = {
         "id": 1,
+        "id_str": 'id_str',
         "username": "test_username",
         "profile": {
             "user_id": 100,
@@ -62,13 +64,16 @@ def test_odm_mapping():
                 "id": {
                     "type": "integer"
                 },
+                "id_str": {
+                    "type": "keyword"
+                },
                 "username": {
                     "fields": {"keyword": {"type": "keyword"}},
                     "type": "text"
                 },
-                "last_login": {
-                    "type": "date"
-                },
+                # "last_login": {
+                #     "type": "date"
+                # },
                 "profile": {
                     "properties": {
                         "user_id": {
