@@ -103,6 +103,7 @@ class FieldInfo(PydanticFieldInfo):
         sa_column_kwargs = kwargs.pop("sa_column_kwargs", Undefined)
 
         keyword = kwargs.pop('keyword', Undefined)
+        fields = kwargs.pop('fields', Undefined)
         suggest = kwargs.pop('suggest', Undefined)
 
         if sa_column is not Undefined:
@@ -127,6 +128,7 @@ class FieldInfo(PydanticFieldInfo):
 
         self.suggest = suggest
         self.keyword = keyword
+        self.fields = fields
 
         self.extra = kwargs
 
@@ -163,6 +165,7 @@ def Field(  # noqa
     schema_extra: Optional[Dict[str, Any]] = None,
 
     keyword: bool = False,
+    fields: dict = None,
     suggest: bool = False,
 
     **extra: Any,
@@ -195,6 +198,7 @@ def Field(  # noqa
 
         keyword=keyword,
         suggest=suggest,
+        fields=fields,
 
         **current_schema_extra,
         **extra,
@@ -204,6 +208,8 @@ def Field(  # noqa
 
 
 def get_dsl_field(field: Field) -> DSLField:
+    multi = False
+
     real_model = None
     if getattr(field, 'sub_fields') and len(field.sub_fields) > 1:
         field.type_ = field.sub_fields[0].type_
@@ -212,34 +218,46 @@ def get_dsl_field(field: Field) -> DSLField:
         # commonField use the 2nd type hit in typing.Union
         if issubclass(field.type_, CommonField):
             field.type_ = field.sub_fields[1].type_
+            field.outer_type_ = field.sub_fields[1].outer_type_
+            real_model = None
+        elif issubclass(field.type_, KeywordField):
+            field.outer_type_ = field.sub_fields[1].outer_type_
             real_model = None
 
+    if hasattr(field.outer_type_, '_name') and getattr(field.outer_type_, '_name') == 'List':
+        multi = True
+
     if issubclass(field.type_, str):
-        if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
-            return Text(fields={"keyword": Keyword()})
-        return Text()
+        if hasattr(field.field_info, 'fields') and field.field_info.fields and isinstance(field.field_info.fields, dict):
+            _fields = field.field_info.fields
+            if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
+                _fields["keyword"] = Keyword(multi=multi, ignore_above=512)
+            return Text(fields=_fields, multi=multi)
+        elif hasattr(field.field_info, 'keyword') and field.field_info.keyword:
+            return Text(fields={"keyword": Keyword(multi=multi, ignore_above=512)}, multi=multi)
+        return Text(multi=multi)
     if issubclass(field.type_, float):
-        return Float()
+        return Float(multi=multi)
     if issubclass(field.type_, bool):
-        return Boolean()
+        return Boolean(multi=multi)
     if issubclass(field.type_, int):
-        return Integer()
+        return Integer(multi=multi)
     if issubclass(field.type_, datetime):
-        return Date()
+        return Date(multi=multi)
     if issubclass(field.type_, date):
-        return Date()
+        return Date(multi=multi)
     if issubclass(field.type_, timedelta):
-        return Integer()
+        return Integer(multi=multi)
     if issubclass(field.type_, time):
-        return Date()
+        return Date(multi=multi)
     if issubclass(field.type_, Enum):
-        return Keyword()
+        return Keyword(multi=multi)
     if issubclass(field.type_, bytes):
-        return Byte()
+        return Byte(multi=multi)
     if issubclass(field.type_, Decimal):
-        return Float()
+        return Float(multi=multi)
     if issubclass(field.type_, dict):
-        return Object()
+        return Object(multi=multi)
 
     # Object Nested Keyword
     if issubclass(field.type_, ObjectField):
@@ -257,6 +275,6 @@ def get_dsl_field(field: Field) -> DSLField:
         return Nested()
 
     if issubclass(field.type_, KeywordField):
-        return Keyword()
+        return Keyword(multi=multi)
 
     return Text()
