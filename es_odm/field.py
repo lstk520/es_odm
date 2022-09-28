@@ -231,10 +231,10 @@ def get_dsl_field(field: Field) -> DSLField:
         if hasattr(field.field_info, 'fields') and field.field_info.fields and isinstance(field.field_info.fields, dict):
             _fields = field.field_info.fields
             if hasattr(field.field_info, 'keyword') and field.field_info.keyword:
-                _fields["keyword"] = Keyword(multi=multi)
+                _fields["keyword"] = Keyword(multi=multi, ignore_above=512)
             return Text(fields=_fields, multi=multi)
         elif hasattr(field.field_info, 'keyword') and field.field_info.keyword:
-            return Text(fields={"keyword": Keyword(multi=multi)}, multi=multi)
+            return Text(fields={"keyword": Keyword(multi=multi, ignore_above=512)}, multi=multi)
         return Text(multi=multi)
     if issubclass(field.type_, float):
         return Float(multi=multi)
